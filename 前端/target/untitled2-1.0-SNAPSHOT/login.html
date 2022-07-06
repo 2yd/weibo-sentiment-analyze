@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- import Vue before Element -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <!-- import JavaScript -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<h1>登录界面</h1>
+<div id="app">
+<form>
+    <label>
+        用户名:
+        <input type="text"  v-model="user" name="username" placeholder="请输入用户名" required/>
+    </label><br><br>
+    <label>
+        密码：
+        <input type="text" v-model="password" name="password" placeholder="请输入密码" required />
+    </label><br><br>
+    <button @click="Login">登录</button>
+</form>
+</div>
+<script>
+
+    new Vue({
+        el:"#app",
+        data:{
+            user:'',
+            password:'',
+        },
+        methods:{
+            Login:function(){
+                var that=this
+                axios({
+                        url: '/untitled2_war/checkLogin',
+                        method: 'post',
+                        data: {
+                            user: that.user,
+                            password:that.password,
+                        },
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+
+                    }
+                ).then(function (response) {
+                    console.log(response)
+                })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            }
+,
+        }
+    })
+</script>
+
+
+
+</body>
+</html>

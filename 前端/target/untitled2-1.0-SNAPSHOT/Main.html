@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- import Vue before Element -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <!-- import JavaScript -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <style>
+    body{
+      background-image: url("background.png");
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+    .el-header{
+      color: #333;
+      text-align: center;
+      /*line-height: 60px;*/
+      /*overflow: hidden;*/
+    }
+    .el-footer{
+      color: #333;
+      text-align: center;
+      /*line-height: 60px;*/
+      /*overflow: hidden;*/
+    }
+
+    .el-main {
+      background-color: transparent;
+      /*color: #333;*/
+      text-align: center;
+      line-height: 0px;
+
+    }
+    .bu {
+      weight:50px;
+      height:30px;
+      background: #008fe0;
+
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <el-container>
+    <el-header>
+
+      <form class="u1" >
+        <!-- 输入查询的网址 -->
+        <el-form :inline="true" :model="formInline" class="demo-form-inline" action="/untitled2_war/ec1" method="post">
+          <el-form-item label="输入查询的用户微博Uid" >
+            <el-input v-model="user" placeholder="输入查询的用户"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="getMessage();openFullScreen();">查询</el-button>
+          </el-form-item>
+        </el-form>
+      </form>
+    </el-header>
+    <el-header>
+      <h3>消极情绪和积极情绪分析</h3>
+    </el-header>
+    <el-container>
+      <el-main>
+        <div id="main" style="width: 1100px;height:500px;"></div>
+      </el-main>
+      <el-main>
+        <div id="pan" style="width: 400px;height:400px;margin-top: 50px"></div>
+      </el-main>
+    </el-container>
+  </el-container>
+  <el-container>
+    <el-header>
+      <h3>具体情绪分析</h3>
+    </el-header>
+    <el-container>
+      <el-main>
+        <div id="main2" style="width: 1100px;height:600px;"></div>
+      </el-main>
+      <el-main>
+        <el-header>
+          <div id="pan2" style="width: 300px;height:300px;"></div>
+        </el-header>
+        <el-main>
+          <div style="height: 150px"></div>
+        </el-main>
+        <el-footer>
+          <div id="pan3" style="width: 300px;height:300px;"></div>
+        </el-footer>
+      </el-main>
+    </el-container>
+  </el-container>
+
+
+  <el-container>
+    <el-header>
+      <h3>
+        搜索词云
+      </h3>
+    </el-header>
+    <el-main>
+      <div style="width: 400px">
+        <p>
+          <el-button @click="setLoading()" style="margin-left: 725px">点击获取专属词云</el-button>
+        </p>
+        <img id="showme" src="img.png" width="800px" height="600px" style="margin-left: 400px"/>
+      </div>
+    </el-main>
+  </el-container>
+
+  <el-container>
+    <el-header>
+
+      <form class="u1" >
+        <!-- 输入查询的网址 -->
+        <el-form :inline="true" :model="formInline" class="demo-form-inline" action="/untitled2_war/ec4" method="post">
+          <el-form-item label="输入查询的关键词" >
+            <el-input v-model="clouduser" placeholder="请输入词云中已有的词"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="getCloudMessage();openFullScreen();">查询</el-button>
+          </el-form-item>
+        </el-form>
+      </form>
+    </el-header>
+    <el-header>
+      <h3>词汇消极情绪和积极情绪分析</h3>
+    </el-header>
+    <el-container>
+      <el-main>
+        <div id="cloudmain" style="width: 1100px;height:500px;"></div>
+      </el-main>
+      <el-main>
+        <div id="cloudpan" style="width: 400px;height:400px;margin-top: 50px"></div>
+      </el-main>
+    </el-container>
+  </el-container>
+  <el-container>
+    <el-header>
+      <h3>词汇具体情绪分析</h3>
+    </el-header>
+    <el-container>
+      <el-main>
+        <div id="cloudmain2" style="width: 1100px;height:600px;"></div>
+      </el-main>
+      <el-main>
+        <el-header>
+          <div id="cloudpan2" style="width: 300px;height:300px;"></div>
+        </el-header>
+        <el-main>
+          <div style="height: 150px"></div>
+        </el-main>
+        <el-footer>
+          <div id="cloudpan3" style="width: 300px;height:300px;"></div>
+        </el-footer>
+      </el-main>
+    </el-container>
+  </el-container>
+
+
+
+
+
+</div>
+<script>
+  function CalVar(p){
+    let SumP=0;
+    for (let i = 0; i < p.length; i++) {
+      SumP+=p[i];
+    }
+    let ans=0;
+    let avgP=SumP/p.length;
+    for (let i = 0; i < p.length; i++) {
+      ans+=(p[i]-avgP)*(p[i]-avgP);
+    }
+    return ans/p.length;
+  }
+  new Vue({
+    el:"#app",
+    data:{
+      imgLoading:false,
+      clouduser:'',
+      fits: [''],
+      url:'',
+      loading: true,
+      currentDate: '2021-06-01',
+      lists: [],
+      fullscreenLoading: false,
+      age:[],
+      name:[],
+      angrySingle:[],
+      angryTotal:[],
+      fearSingle:[],
+      fearTotal:[],
+      happySingle:[],
+      happyTotal:[],
+      neutralSingle:[],
+      neutralTotal:[],
+      sadSingle:[],
+      sadTotal:[],
+      surSingle:[],
+      surTotal:[],
+      dayAge:[],
+      dayName:[],
+      cloudage:[],
+      cloudname:[],
+      cloudangrySingle:[],
+      cloudangryTotal:[],
+      cloudfearSingle:[],
+      cloudfearTotal:[],
+      cloudhappySingle:[],
+      cloudhappyTotal:[],
+      cloudneutralSingle:[],
+      cloudneutralTotal:[],
+      cloudsadSingle:[],
+      cloudsadTotal:[],
+      cloudsurSingle:[],
+      cloudsurTotal:[],
+      clouddayAge:[],
+      clouddayName:[],
+      user: '',
+      imgUser:'',
+      ImgUrl:'a.png',
+      formInline: {
+        region: '',
+      },
+    },
+    methods:{
+      setLoading() {
+        var that=this;
+        axios.post("/untitled2_war/ec2",{username:that.imgUser}).then(function(response){
+          document.getElementById("showme").src="/untitled2_war/ec3";
+          that.loading=false;
+        },function (err){
+          console.log(err)
+        });
+
+
+      },
+      onSubmit:function (){
+        alert("已经上交")
+      },
+      openFullScreen() {
+        loading = this.$loading({
+          lock: true,
+          text: '请耐心等待数据的获取',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        // setTimeout(() => {
+        //   loading.close();
+        // }, 10000);
+      },
+      getMessage:function() {
+        var that = this;
+        if (that.user == null) {
+          return;
+        }
+        axios.post("/untitled2_war/ec1", {username: that.user}).then(function (response) {
+          that.imgUser = that.user;
+          that.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+            loading.close();
+          });
+          var myChart = echarts.init(document.getElementById('main'));
+          var myChart2 = echarts.init(document.getElementById('main2'));
+          for (var i = 0; i < response.data.length; i++) {
+            that.dayAge[i] = response.data[i].single_value;
+            that.dayName[i] = response.data[i].time;
+            that.age[i] = response.data[i].total_value;
+            that.name[i] = response.data[i].time;
+            that.angrySingle[i] = response.data[i].single_angry_value;
+            that.angryTotal[i] = response.data[i].total_angry_value;
+            that.fearSingle[i] = response.data[i].single_fear_value;
+            that.happySingle[i] = response.data[i].single_happy_value;
+            that.happyTotal[i] = response.data[i].total_happy_value;
+            that.neutralSingle[i] = response.data[i].single_neutral_value;
+            that.neutralTotal[i] = response.data[i].total_neutral_value;
+            that.sadSingle[i] = response.data[i].single_sad_value;
+            that.sadTotal[i] = response.data[i].total_sad_value;
+            that.surSingle[i] = response.data[i].single_surprise_value;
+            that.surTotal[i] = response.data[i].total_surprise_value;
+            that.fearTotal[i] = response.data[i].total_fear_value;
+          }
+          option = {
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'cross',
+                label: {
+                  backgroundColor: '#6a7985'
+                }
+              }
+            },
+            legend: {
+              data: [
+                {
+                  name: '五天线',
+                  icon: 'rect',
+                },
+                {
+                  name: '当天',
+                  icon: 'circle',
+                },
+              ]
+            }
+            ,
+            xAxis: {
+              type: 'category',
+              data: name
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: [
+              {
+                name: '五天线',
+                data: that.age,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '当天',
+                data: that.dayAge,
+                type: 'line',
+                smooth: true,
+              }
+            ]
+          };
+          myChart.setOption(option)
+          myChart.on('click', function (params) {
+            var myChartPan = echarts.init(document.getElementById('pan'));
+            optionPan = {
+              tooltip: {
+                trigger: 'item',
+                formatter: '{b} : {c} ({d}%)',
+                confine: true//将此限制打开后tooltip将不再溢出
+              },
+              series: [
+                {
+                  type: 'pie',
+                  data: [
+                    {
+                      value: params.data,
+                      name: '积极'
+                    },
+                    {
+                      value: 1 - params.data,
+                      name: '消极'
+                    },
+                  ],
+                  label: {
+                    normal: {
+                      position: "inside"//此处将展示的文字在内部展示
+                    }
+                  },
+                }
+              ]
+            };
+            let currentIndex = -1;
+
+
+            var dataLen = option.series[0].data.length;
+            // 取消之前高亮的图形
+            myChartPan.dispatchAction({
+              type: 'downplay',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            currentIndex = (currentIndex + 1) % dataLen;
+            // 高亮当前图形
+            myChartPan.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            // 显示 tooltip
+            myChartPan.dispatchAction({
+              type: 'showTip',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+
+            myChartPan.setOption(optionPan);
+          });
+          option2 = {
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'cross',
+                label: {
+                  backgroundColor: '#6a7985'
+                }
+              }
+
+            },
+            legend: {
+              data: [
+                {
+                  name: '生气指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均生气指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '恐惧指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均恐惧指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '开心指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均开心指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '中性指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均中性指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '伤心指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均伤心指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '惊喜指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均惊喜指数',
+                  icon: 'circle',
+                },
+              ]
+            }
+            ,
+            xAxis: {
+              type: 'category',
+              data: that.dayName
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: [
+              {
+                name: '生气指数',
+                data: that.angrySingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均生气指数',
+                data: that.angryTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '恐惧指数',
+                data: that.fearSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均恐惧指数',
+                data: that.fearTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '开心指数',
+                data: that.happySingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均开心指数',
+                data: that.happyTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '中性指数',
+                data: that.neutralSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均中性指数',
+                data: that.neutralTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '伤心指数',
+                data: that.sadSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均伤心指数',
+                data: that.sadTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '惊喜指数',
+                data: that.surSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均惊喜指数',
+                data: that.surTotal,
+                type: 'line',
+                smooth: true,
+              },
+
+            ]
+          };
+          myChart2.setOption(option2)
+          myChart2.on('click', function (params) {
+            var myChartPan2 = echarts.init(document.getElementById('pan2'));
+            optionPan2 = {
+              tooltip: {
+                trigger: 'item',
+                formatter: '{b} : {c} ({d}%)',
+                confine: true//将此限制打开后tooltip将不再溢出
+              },
+              series: [
+                {
+                  type: 'pie',
+                  data: [
+                    {
+                      value: that.angrySingle[params.dataIndex],
+                      name: '当日生气'
+                    },
+                    {
+                      value: that.fearSingle[params.dataIndex],
+                      name: '当日恐惧'
+                    },
+                    {
+                      value: that.happySingle[params.dataIndex],
+                      name: '当日开心'
+                    },
+                    {
+                      value: that.neutralSingle[params.dataIndex],
+                      name: '当日中性'
+                    },
+                    {
+                      value: that.sadSingle[params.dataIndex],
+                      name: '当日伤心'
+                    },
+                    {
+                      value: that.surSingle[params.dataIndex],
+                      name: '当日惊喜'
+                    },
+                  ],
+                  label: {
+                    normal: {
+                      position: "inside"//此处将展示的文字在内部展示
+                    }
+                  },
+                }
+              ]
+            };
+            let currentIndex = -1;
+
+
+            var dataLen = option2.series[0].data.length;
+            // 取消之前高亮的图形
+            myChartPan2.dispatchAction({
+              type: 'downplay',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            currentIndex = (currentIndex + 1) % dataLen;
+            // 高亮当前图形
+            myChartPan2.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            // 显示 tooltip
+            myChartPan2.dispatchAction({
+              type: 'showTip',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+
+            myChartPan2.setOption(optionPan2);
+
+
+            var myChartPan3 = echarts.init(document.getElementById('pan3'));
+            optionPan3 = {
+              tooltip: {
+                trigger: 'item',
+                formatter: '{b} : {c} ({d}%)',
+                confine: true//将此限制打开后tooltip将不再溢出
+              },
+              series: [
+                {
+                  type: 'pie',
+                  data: [
+                    {
+                      value: that.angryTotal[params.dataIndex],
+                      name: '5日均生气'
+                    },
+                    {
+                      value: that.fearTotal[params.dataIndex],
+                      name: '5日均恐惧'
+                    },
+                    {
+                      value: that.happyTotal[params.dataIndex],
+                      name: '5日均开心'
+                    },
+                    {
+                      value: that.neutralTotal[params.dataIndex],
+                      name: '5日均中性'
+                    },
+                    {
+                      value: that.sadTotal[params.dataIndex],
+                      name: '5日均伤心'
+                    },
+                    {
+                      value: that.surTotal[params.dataIndex],
+                      name: '5日均惊喜'
+                    },
+                  ],
+                  label: {
+                    normal: {
+                      position: "inside"//此处将展示的文字在内部展示
+                    }
+                  },
+                }
+              ]
+            };
+            let currentIndex2 = -1;
+
+
+            var dataLen = option2.series[0].data.length;
+            // 取消之前高亮的图形
+            myChartPan3.dispatchAction({
+              type: 'downplay',
+              seriesIndex: 0,
+              dataIndex: currentIndex2
+            });
+            currentIndex3 = (currentIndex2 + 1) % dataLen;
+            // 高亮当前图形
+            myChartPan3.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: currentIndex2
+            });
+            // 显示 tooltip
+            myChartPan3.dispatchAction({
+              type: 'showTip',
+              seriesIndex: 0,
+              dataIndex: currentIndex2
+            });
+
+            myChartPan3.setOption(optionPan3);
+          });
+        }, function (err) {
+          that.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+            loading.close();
+          });
+          alert("分析数据失败")
+          console.log(err)
+        })
+        //获取不同的情绪
+      },
+
+
+      getCloudMessage:function() {
+        var that = this;
+        if (that.user == null) {
+          return;
+        }
+        axios.post("/untitled2_war/ec4", {username: that.user, cloudname: that.clouduser}).then(function (response) {
+          that.imgUser = that.user;
+          that.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+            loading.close();
+          });
+          var myChart = echarts.init(document.getElementById('cloudmain'));
+          var myChart2 = echarts.init(document.getElementById('cloudmain2'));
+          for (var i = 0; i < response.data.length; i++) {
+            that.clouddayAge[i] = response.data[i].single_value;
+            that.clouddayName[i] = response.data[i].time;
+            that.cloudage[i] = response.data[i].total_value;
+            that.cloudname[i] = response.data[i].time;
+            that.cloudangrySingle[i] = response.data[i].single_angry_value;
+            that.cloudangryTotal[i] = response.data[i].total_angry_value;
+            that.cloudfearSingle[i] = response.data[i].single_fear_value;
+            that.cloudhappySingle[i] = response.data[i].single_happy_value;
+            that.cloudhappyTotal[i] = response.data[i].total_happy_value;
+            that.cloudneutralSingle[i] = response.data[i].single_neutral_value;
+            that.cloudneutralTotal[i] = response.data[i].total_neutral_value;
+            that.cloudsadSingle[i] = response.data[i].single_sad_value;
+            that.cloudsadTotal[i] = response.data[i].total_sad_value;
+            that.cloudsurSingle[i] = response.data[i].single_surprise_value;
+            that.cloudsurTotal[i] = response.data[i].total_surprise_value;
+            that.cloudfearTotal[i] = response.data[i].total_fear_value;
+          }
+          option = {
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'cross',
+                label: {
+                  backgroundColor: '#6a7985'
+                }
+              }
+            },
+            legend: {
+              data: [
+                {
+                  name: '五天线',
+                  icon: 'rect',
+                },
+                {
+                  name: '当天',
+                  icon: 'circle',
+                },
+              ]
+            }
+            ,
+            xAxis: {
+              type: 'category',
+              data: that.cloudname
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: [
+              {
+                name: '五天线',
+                data: that.cloudage,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '当天',
+                data: that.clouddayAge,
+                type: 'line',
+                smooth: true,
+              }
+            ]
+          };
+          myChart.setOption(option)
+          myChart.on('click', function (params) {
+            var myChartPan = echarts.init(document.getElementById('cloudpan'));
+            optionPan = {
+              tooltip: {
+                trigger: 'item',
+                formatter: '{b} : {c} ({d}%)',
+                confine: true//将此限制打开后tooltip将不再溢出
+              },
+              series: [
+                {
+                  type: 'pie',
+                  data: [
+                    {
+                      value: params.data,
+                      name: '积极'
+                    },
+                    {
+                      value: 1 - params.data,
+                      name: '消极'
+                    },
+                  ],
+                  label: {
+                    normal: {
+                      position: "inside"//此处将展示的文字在内部展示
+                    }
+                  },
+                }
+              ]
+            };
+            let currentIndex = -1;
+
+
+            var dataLen = option.series[0].data.length;
+            // 取消之前高亮的图形
+            myChartPan.dispatchAction({
+              type: 'downplay',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            currentIndex = (currentIndex + 1) % dataLen;
+            // 高亮当前图形
+            myChartPan.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            // 显示 tooltip
+            myChartPan.dispatchAction({
+              type: 'showTip',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+
+            myChartPan.setOption(optionPan);
+          });
+          option2 = {
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'cross',
+                label: {
+                  backgroundColor: '#6a7985'
+                }
+              }
+
+            },
+            legend: {
+              data: [
+                {
+                  name: '生气指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均生气指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '恐惧指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均恐惧指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '开心指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均开心指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '中性指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均中性指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '伤心指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均伤心指数',
+                  icon: 'circle',
+                },
+                {
+                  name: '惊喜指数',
+                  icon: 'rect',
+                },
+                {
+                  name: '5日均惊喜指数',
+                  icon: 'circle',
+                },
+              ]
+            }
+            ,
+            xAxis: {
+              type: 'category',
+              data: that.clouddayName
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: [
+              {
+                name: '生气指数',
+                data: that.cloudangrySingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均生气指数',
+                data: that.cloudangryTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '恐惧指数',
+                data: that.cloudfearSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均恐惧指数',
+                data: that.cloudfearTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '开心指数',
+                data: that.cloudhappySingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均开心指数',
+                data: that.cloudhappyTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '中性指数',
+                data: that.cloudneutralSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均中性指数',
+                data: that.cloudneutralTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '伤心指数',
+                data: that.cloudsadSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均伤心指数',
+                data: that.cloudsadTotal,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '惊喜指数',
+                data: that.cloudsurSingle,
+                type: 'line',
+                smooth: true,
+              },
+              {
+                name: '5日均惊喜指数',
+                data: that.cloudsurTotal,
+                type: 'line',
+                smooth: true,
+              },
+
+            ]
+          };
+          myChart2.setOption(option2)
+          myChart2.on('click', function (params) {
+            var myChartPan2 = echarts.init(document.getElementById('cloudpan2'));
+            optionPan2 = {
+              tooltip: {
+                trigger: 'item',
+                formatter: '{b} : {c} ({d}%)',
+                confine: true//将此限制打开后tooltip将不再溢出
+              },
+              series: [
+                {
+                  type: 'pie',
+                  data: [
+                    {
+                      value: that.cloudangrySingle[params.dataIndex],
+                      name: '当日生气'
+                    },
+                    {
+                      value: that.cloudfearSingle[params.dataIndex],
+                      name: '当日恐惧'
+                    },
+                    {
+                      value: that.cloudhappySingle[params.dataIndex],
+                      name: '当日开心'
+                    },
+                    {
+                      value: that.cloudneutralSingle[params.dataIndex],
+                      name: '当日中性'
+                    },
+                    {
+                      value: that.cloudsadSingle[params.dataIndex],
+                      name: '当日伤心'
+                    },
+                    {
+                      value: that.cloudsurSingle[params.dataIndex],
+                      name: '当日惊喜'
+                    },
+                  ],
+                  label: {
+                    normal: {
+                      position: "inside"//此处将展示的文字在内部展示
+                    }
+                  },
+                }
+              ]
+            };
+            let currentIndex = -1;
+
+
+            var dataLen = option2.series[0].data.length;
+            // 取消之前高亮的图形
+            myChartPan2.dispatchAction({
+              type: 'downplay',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            currentIndex = (currentIndex + 1) % dataLen;
+            // 高亮当前图形
+            myChartPan2.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+            // 显示 tooltip
+            myChartPan2.dispatchAction({
+              type: 'showTip',
+              seriesIndex: 0,
+              dataIndex: currentIndex
+            });
+
+            myChartPan2.setOption(optionPan2);
+
+
+            var myChartPan3 = echarts.init(document.getElementById('cloudpan3'));
+            optionPan3 = {
+              tooltip: {
+                trigger: 'item',
+                formatter: '{b} : {c} ({d}%)',
+                confine: true//将此限制打开后tooltip将不再溢出
+              },
+              series: [
+                {
+                  type: 'pie',
+                  data: [
+                    {
+                      value: that.cloudangryTotal[params.dataIndex],
+                      name: '5日均生气'
+                    },
+                    {
+                      value: that.cloudfearTotal[params.dataIndex],
+                      name: '5日均恐惧'
+                    },
+                    {
+                      value: that.cloudhappyTotal[params.dataIndex],
+                      name: '5日均开心'
+                    },
+                    {
+                      value: that.cloudneutralTotal[params.dataIndex],
+                      name: '5日均中性'
+                    },
+                    {
+                      value: that.cloudsadTotal[params.dataIndex],
+                      name: '5日均伤心'
+                    },
+                    {
+                      value: that.cloudsurTotal[params.dataIndex],
+                      name: '5日均惊喜'
+                    },
+                  ],
+                  label: {
+                    normal: {
+                      position: "inside"//此处将展示的文字在内部展示
+                    }
+                  },
+                }
+              ]
+            };
+            let currentIndex2 = -1;
+
+
+            var dataLen = option2.series[0].data.length;
+            // 取消之前高亮的图形
+            myChartPan3.dispatchAction({
+              type: 'downplay',
+              seriesIndex: 0,
+              dataIndex: currentIndex2
+            });
+            currentIndex3 = (currentIndex2 + 1) % dataLen;
+            // 高亮当前图形
+            myChartPan3.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: currentIndex2
+            });
+            // 显示 tooltip
+            myChartPan3.dispatchAction({
+              type: 'showTip',
+              seriesIndex: 0,
+              dataIndex: currentIndex2
+            });
+
+            myChartPan3.setOption(optionPan3);
+          });
+        }, function (err) {
+          that.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+            loading.close();
+          });
+          alert("分析数据失败")
+          console.log(err)
+        })
+      }
+    },
+
+  })
+
+</script>
+
+</body>
+</html>
